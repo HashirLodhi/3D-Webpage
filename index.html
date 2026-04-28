@@ -1,0 +1,536 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Scroll Experience</title>
+  <meta name="description" content="An immersive scroll-driven video animation experience." />
+  <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+  <meta name="renderer" content="webkit" />
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600;700;900&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="styles-enhanced.css" />
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    :root {
+      --white: #ffffff;
+      --black: #000000;
+      --accent: #e8ff47;
+      --muted: rgba(255,255,255,0.55);
+    }
+
+    html { scroll-behavior: auto; }
+
+    body {
+      background: #000;
+      color: var(--white);
+      font-family: 'Inter', sans-serif;
+      overflow-x: hidden;
+    }
+
+    /* ── Hero / Scroll Section ── */
+    #scroll-section {
+      position: relative;
+      /* height = frames × pixels-per-frame  →  145 × 18 ≈ 2610 */
+      height: 2610px;
+    }
+
+    #sticky-wrap {
+      position: sticky;
+      top: 0;
+      height: 100vh;
+      width: 100%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      overflow: hidden;
+    }
+
+    /* Canvas fills the viewport — CSS size only; pixel size set via JS with DPR */
+    #frame-canvas {
+      display: block;
+      width: 100%;
+      height: 100%;
+      image-rendering: -webkit-optimize-contrast;
+      image-rendering: crisp-edges;
+      image-rendering: high-quality;
+    }
+
+    /* Overlay UI */
+    #overlay {
+      position: absolute;
+      inset: 0;
+      pointer-events: none;
+      display: flex;
+      flex-direction: column;
+      justify-content: flex-end;
+      padding: 0 8vw 7vh;
+    }
+
+    #hero-label {
+      font-size: clamp(0.65rem, 1.2vw, 0.9rem);
+      font-weight: 600;
+      letter-spacing: 0.22em;
+      text-transform: uppercase;
+      color: var(--accent);
+      margin-bottom: 14px;
+      opacity: 0;
+      transform: translateY(18px);
+      transition: opacity 0.6s ease, transform 0.6s ease;
+    }
+
+    #hero-title {
+      font-size: clamp(2rem, 6vw, 5.5rem);
+      font-weight: 900;
+      line-height: 1.05;
+      letter-spacing: -0.03em;
+      max-width: 14ch;
+      opacity: 0;
+      transform: translateY(24px);
+      transition: opacity 0.7s ease 0.1s, transform 0.7s ease 0.1s;
+    }
+
+    #scroll-hint {
+      position: absolute;
+      bottom: 42px;
+      left: 50%;
+      transform: translateX(-50%);
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 8px;
+      opacity: 1;
+      transition: opacity 0.4s ease;
+    }
+
+    #scroll-hint span {
+      font-size: 0.68rem;
+      letter-spacing: 0.18em;
+      text-transform: uppercase;
+      color: var(--muted);
+    }
+
+    .scroll-arrow {
+      width: 22px;
+      height: 22px;
+      border-right: 2px solid rgba(255,255,255,0.4);
+      border-bottom: 2px solid rgba(255,255,255,0.4);
+      transform: rotate(45deg);
+      animation: bounce 1.6s infinite;
+    }
+
+    @keyframes bounce {
+      0%, 100% { transform: rotate(45deg) translateY(0); opacity: 0.6; }
+      50%       { transform: rotate(45deg) translateY(6px); opacity: 1; }
+    }
+
+    /* Progress bar */
+    #progress-bar {
+      position: fixed;
+      top: 0; left: 0;
+      height: 2px;
+      width: 0%;
+      background: linear-gradient(90deg, var(--accent), #fff);
+      z-index: 100;
+      transition: width 0.05s linear;
+    }
+
+    /* Frame counter badge */
+    #frame-counter {
+      position: fixed;
+      top: 18px;
+      right: 22px;
+      font-size: 0.7rem;
+      letter-spacing: 0.12em;
+      color: rgba(255,255,255,0.35);
+      z-index: 100;
+      font-variant-numeric: tabular-nums;
+    }
+
+    /* ── Below-fold content ── */
+    #content {
+      background: #050505;
+      padding: 120px 8vw;
+    }
+
+    .section-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 80px 60px;
+      max-width: 1100px;
+      margin: 0 auto;
+    }
+
+    @media (max-width: 720px) {
+      .section-grid { grid-template-columns: 1fr; gap: 56px; }
+    }
+
+    .card {
+      border-top: 1px solid rgba(255,255,255,0.08);
+      padding-top: 36px;
+      opacity: 0;
+      transform: translateY(40px);
+      transition: opacity 0.8s ease, transform 0.8s ease;
+    }
+
+    .card.visible {
+      opacity: 1;
+      transform: none;
+    }
+
+    .card-eyebrow {
+      font-size: 0.68rem;
+      font-weight: 600;
+      letter-spacing: 0.2em;
+      text-transform: uppercase;
+      color: var(--accent);
+      margin-bottom: 16px;
+    }
+
+    .card h2 {
+      font-size: clamp(1.4rem, 2.8vw, 2rem);
+      font-weight: 700;
+      letter-spacing: -0.02em;
+      line-height: 1.2;
+      margin-bottom: 18px;
+    }
+
+    .card p {
+      font-size: 1rem;
+      line-height: 1.72;
+      color: rgba(255,255,255,0.58);
+      font-weight: 300;
+    }
+
+    /* Loading overlay */
+    #loader {
+      position: fixed;
+      inset: 0;
+      background: #000;
+      z-index: 999;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      gap: 22px;
+      transition: opacity 0.5s ease;
+    }
+
+    #loader.hidden {
+      opacity: 0;
+      pointer-events: none;
+    }
+
+    #loader-label {
+      font-size: 0.72rem;
+      letter-spacing: 0.22em;
+      text-transform: uppercase;
+      color: var(--muted);
+    }
+
+    #loader-bar-wrap {
+      width: 220px;
+      height: 2px;
+      background: rgba(255,255,255,0.1);
+      border-radius: 2px;
+      overflow: hidden;
+    }
+
+    #loader-bar {
+      height: 100%;
+      width: 0%;
+      background: linear-gradient(90deg, var(--accent), #fff);
+      transition: width 0.1s linear;
+    }
+  </style>
+</head>
+<body>
+
+  <!-- Loading Screen -->
+  <div id="loader">
+    <div id="loader-label">Loading frames…</div>
+    <div id="loader-bar-wrap">
+      <div id="loader-bar"></div>
+    </div>
+  </div>
+
+  <!-- Progress & counter -->
+  <div id="progress-bar"></div>
+  <div id="frame-counter">001 / 145</div>
+
+  <!-- Scroll-driven animation section -->
+  <section id="scroll-section">
+    <div id="sticky-wrap">
+      <canvas id="frame-canvas"></canvas>
+
+      <!-- Text overlay -->
+      <div id="overlay">
+        <div id="hero-label">Scroll to Experience</div>
+        <h1 id="hero-title">Every Frame<br/>Tells a Story</h1>
+      </div>
+
+      <!-- Initial scroll hint -->
+      <div id="scroll-hint">
+        <span>Scroll</span>
+        <div class="scroll-arrow"></div>
+      </div>
+    </div>
+  </section>
+
+  <!-- Below fold content -->
+  <section id="content">
+    <div class="section-grid">
+      <div class="card">
+        <div class="card-eyebrow">01 — Precision</div>
+        <h2>Frame-Perfect Control</h2>
+        <p>Every pixel of scroll maps exactly to a frame, giving you tactile control over the sequence — like scrubbing a timeline with your fingertips.</p>
+      </div>
+      <div class="card">
+        <div class="card-eyebrow">02 — Performance</div>
+        <h2>Hardware-Accelerated Canvas</h2>
+        <p>Images are decoded once and painted via an offscreen canvas pipeline, ensuring buttery smooth playback at any scroll speed.</p>
+      </div>
+      <div class="card">
+        <div class="card-eyebrow">03 — Design</div>
+        <h2>Cinematic Storytelling</h2>
+        <p>Inspired by Apple's product pages, this technique turns a simple scroll gesture into an immersive, narrative-driven motion experience.</p>
+      </div>
+      <div class="card">
+        <div class="card-eyebrow">04 — Craft</div>
+        <h2>Zero Dependencies</h2>
+        <p>Pure HTML, CSS, and vanilla JavaScript. No libraries, no frameworks — just the web platform performing at its finest.</p>
+      </div>
+    </div>
+  </section>
+
+  <script src="frame-animator.js"></script>
+  <script src="image-enhancer.js"></script>
+  <script>
+    /* ─── Config ─── */
+    const TOTAL_FRAMES = 145;
+    const FRAME_PATH   = (n) => `Frames/ezgif-frame-${String(n).padStart(3,'0')}.jpg`;
+
+    /* ─── Elements ─── */
+    const canvas      = document.getElementById('frame-canvas');
+    const ctx         = canvas.getContext('2d', { 
+      alpha: false, 
+      antialias: true, 
+      desynchronized: true,
+      willReadFrequently: false 
+    });
+    const section     = document.getElementById('scroll-section');
+    const loader      = document.getElementById('loader');
+    const loaderBar   = document.getElementById('loader-bar');
+    const progressBar = document.getElementById('progress-bar');
+    const counter     = document.getElementById('frame-counter');
+    const heroLabel   = document.getElementById('hero-label');
+    const heroTitle   = document.getElementById('hero-title');
+    const scrollHint  = document.getElementById('scroll-hint');
+    const cards       = document.querySelectorAll('.card');
+
+    /* ─── State ─── */
+    const images = new Array(TOTAL_FRAMES);
+    const imageCache = new Map(); // Cache decoded bitmaps
+    let currentFrame = 0;
+    let targetFrame = 0;
+    let loadedCount  = 0;
+    let rafPending   = false;
+    let animationProgress = 0; // For smooth interpolation
+    
+    // Initialize frame animator for smoother transitions
+    let frameAnimator = null;
+    let imageEnhancer = null;
+
+    /* ─── Canvas resize — honour device pixel ratio for crisp rendering ─── */
+    function resizeCanvas() {
+      const dpr = Math.min(window.devicePixelRatio || 1, 2); // Cap at 2x for performance
+      const w   = window.innerWidth;
+      const h   = window.innerHeight;
+
+      // Physical pixel dimensions
+      canvas.width  = Math.round(w * dpr);
+      canvas.height = Math.round(h * dpr);
+
+      // CSS display size stays at 100vw / 100vh
+      canvas.style.width  = w + 'px';
+      canvas.style.height = h + 'px';
+
+      // Scale context so all draw calls use CSS-pixel coordinates
+      ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
+      
+      // Improve image quality
+      ctx.imageSmoothingEnabled = true;
+      ctx.imageSmoothingQuality = 'high';
+
+      drawFrame(currentFrame);
+    }
+
+    /* ─── Draw a single frame with improved quality ─── */
+    function drawFrame(index) {
+      const img = images[index];
+      if (!img || !img.complete || img.naturalWidth === 0) return;
+
+      // Use CSS pixel dimensions (context is already scaled by DPR)
+      const cw = window.innerWidth;
+      const ch = window.innerHeight;
+
+      ctx.clearRect(0, 0, cw, ch);
+      
+      // Set high quality rendering
+      ctx.imageSmoothingEnabled = true;
+      ctx.imageSmoothingQuality = 'high';
+
+      const iw = img.naturalWidth, ih = img.naturalHeight;
+      const scale = Math.max(cw / iw, ch / ih);   // object-fit: cover
+      const dw = iw * scale, dh = ih * scale;
+      const dx = (cw - dw) / 2, dy = (ch - dh) / 2;
+
+      ctx.drawImage(img, dx, dy, dw, dh);
+    }
+
+    /* ─── Smooth frame transition with interpolation ─── */
+    function smoothDrawFrame(targetIndex) {
+      if (!rafPending) {
+        rafPending = true;
+        requestAnimationFrame(() => {
+          drawFrame(targetIndex);
+          rafPending = false;
+        });
+      }
+    }
+
+    /* ─── Scroll handler with improved frame calculation ─── */
+    function onScroll() {
+      const rect     = section.getBoundingClientRect();
+      const total    = section.offsetHeight - window.innerHeight;
+      const scrolled = Math.max(0, -rect.top);
+      const progress = Math.min(scrolled / total, 1);
+
+      // Progress bar
+      progressBar.style.width = (progress * 100) + '%';
+
+      // Frame index with improved calculation
+      const frameIdx = Math.min(
+        Math.round(progress * (TOTAL_FRAMES - 1)), // Changed to round for better precision
+        TOTAL_FRAMES - 1
+      );
+
+      // Counter
+      counter.textContent =
+        String(frameIdx + 1).padStart(3, '0') + ' / ' + String(TOTAL_FRAMES).padStart(3, '0');
+
+      // Text fade-in after first few frames
+      if (frameIdx > 10) {
+        heroLabel.style.opacity = '1';
+        heroLabel.style.transform = 'translateY(0)';
+        heroTitle.style.opacity = '1';
+        heroTitle.style.transform = 'translateY(0)';
+      } else {
+        heroLabel.style.opacity = '0';
+        heroLabel.style.transform = 'translateY(18px)';
+        heroTitle.style.opacity = '0';
+        heroTitle.style.transform = 'translateY(24px)';
+      }
+
+      // Scroll hint
+      scrollHint.style.opacity = scrolled > 60 ? '0' : '1';
+
+      if (frameIdx === currentFrame) return;
+      currentFrame = frameIdx;
+
+      // Use frame animator if available, otherwise fallback to smoothDrawFrame
+      if (frameAnimator) {
+        frameAnimator.transitionTo(currentFrame);
+      } else {
+        smoothDrawFrame(currentFrame);
+      }
+    }
+
+    /* ─── Intersection Observer for cards ─── */
+    const cardObserver = new IntersectionObserver((entries) => {
+      entries.forEach(e => {
+        if (e.isIntersecting) {
+          e.target.classList.add('visible');
+          cardObserver.unobserve(e.target);
+        }
+      });
+    }, { threshold: 0.15 });
+
+    cards.forEach((c, i) => {
+      c.style.transitionDelay = (i * 0.12) + 's';
+      cardObserver.observe(c);
+    });
+
+    /* ─── Preload all frames with optimized decoding ─── */
+    async function loadImages() {
+      // Initialize image enhancer
+      imageEnhancer = new ImageQualityEnhancer();
+      
+      // Load images in batches to avoid overwhelming the browser
+      const batchSize = 10;
+      
+      for (let i = 0; i < TOTAL_FRAMES; i += batchSize) {
+        const batch = [];
+        const end = Math.min(i + batchSize, TOTAL_FRAMES);
+        
+        for (let j = i; j < end; j++) {
+          const img = new Image();
+          img.decoding = 'async'; // Async decoding for better performance
+          
+          const promise = new Promise((resolve) => {
+            img.onload = () => {
+              loadedCount++;
+              loaderBar.style.width = Math.round((loadedCount / TOTAL_FRAMES) * 100) + '%';
+              
+              // Create image bitmap for better quality
+              if (window.createImageBitmap) {
+                createImageBitmap(img).then(bitmap => {
+                  imageCache.set(j, bitmap);
+                  resolve();
+                }).catch(() => resolve());
+              } else {
+                resolve();
+              }
+              
+              if (loadedCount === TOTAL_FRAMES) {
+                // All done — hide loader
+                loader.classList.add('hidden');
+                setTimeout(() => loader.remove(), 600);
+                drawFrame(0);
+              } else if (loadedCount === 1) {
+                // Show first frame ASAP
+                drawFrame(0);
+              }
+            };
+            img.onerror = () => resolve(); // Continue even if image fails
+          });
+          
+          batch.push(promise);
+          img.src = FRAME_PATH(j + 1);
+          images[j] = img;
+        }
+        
+        // Wait for batch to complete before starting next
+        await Promise.all(batch);
+      }
+    }
+
+    /* ─── Init ─── */
+    window.addEventListener('resize', resizeCanvas, { passive: true });
+    window.addEventListener('scroll', onScroll,     { passive: true });
+    resizeCanvas();
+    loadImages();
+    
+    // Initialize frame animator after images are loaded
+    setTimeout(() => {
+      frameAnimator = new FrameAnimator(canvas, ctx, TOTAL_FRAMES);
+      imageEnhancer = new ImageQualityEnhancer();
+      // Make images available to the animator
+      window.images = images;
+    }, 100);
+  </script>
+
+</body>
+</html>

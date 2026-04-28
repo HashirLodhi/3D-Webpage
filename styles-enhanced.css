@@ -1,0 +1,84 @@
+/**
+ * Enhanced Visual Effects & Quality Improvements
+ * CSS optimizations for better rendering quality
+ */
+
+/* Hardware acceleration for canvas */
+#frame-canvas {
+  transform: translateZ(0);
+  will-change: transform;
+  backface-visibility: hidden;
+  perspective: 1000px;
+}
+
+/* Improve overall rendering quality */
+* {
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+/* Smooth scrolling for better experience */
+html {
+  scroll-behavior: smooth;
+}
+
+/* Enhanced canvas container */
+#sticky-wrap {
+  transform: translateZ(0);
+  will-change: transform;
+}
+
+/* Optimize text rendering */
+#hero-title, #hero-label, .card h2, .card p {
+  text-rendering: optimizeLegibility;
+  -webkit-text-size-adjust: 100%;
+}
+
+/* Loading animation enhancement */
+#loader {
+  backdrop-filter: blur(10px);
+  background: rgba(0, 0, 0, 0.9);
+}
+
+/* Progress bar glow effect */
+#progress-bar {
+  box-shadow: 0 0 10px rgba(232, 255, 71, 0.5);
+}
+
+/* Frame counter enhancement */
+#frame-counter {
+  background: rgba(0, 0, 0, 0.4);
+  padding: 4px 8px;
+  border-radius: 4px;
+  backdrop-filter: blur(5px);
+}
+
+/* Card hover effects */
+.card {
+  transition: all 0.3s ease;
+}
+
+.card:hover {
+  transform: translateY(-5px);
+}
+
+/* Scroll hint enhancement */
+#scroll-hint {
+  backdrop-filter: blur(5px);
+  background: rgba(0, 0, 0, 0.3);
+  padding: 12px 20px;
+  border-radius: 20px;
+}
+
+/* Responsive image quality */
+@media (-webkit-min-device-pixel-ratio: 2), (min-resolution: 192dpi) {
+  #frame-canvas {
+    image-rendering: -webkit-optimize-contrast;
+  }
+}
+
+@media (-webkit-min-device-pixel-ratio: 3), (min-resolution: 288dpi) {
+  #frame-canvas {
+    image-rendering: crisp-edges;
+  }
+}

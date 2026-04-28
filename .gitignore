@@ -1,0 +1,33 @@
+# Python
+__pycache__/
+*.py[cod]
+*.pyo
+*.pyc
+
+# Frame Backups (optional - remove if you want to keep them)
+Frames_backup/
+
+# OS Files
+.DS_Store
+Thumbs.db
+desktop.ini
+.vscode/
+.idea/
+
+# Video Files (too large for Git - keep only extracted frames)
+*.mp4
+*.avi
+*.mov
+*.mkv
+*.wmv
+*.flv
+
+# Large media files (optional)
+*.zip
+*.tar.gz
+
+# Reports (optional - remove if you want to keep them)
+extraction-report.txt
+
+# Logs
+*.log

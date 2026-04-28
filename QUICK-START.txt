@@ -1,0 +1,117 @@
+================================================================================
+                    QUICK START - GITHUB PAGES DEPLOYMENT
+================================================================================
+
+📝 ONE-TIME SETUP (5 minutes):
+═══════════════════════════════════════════════════════════════════════════════
+
+1. CREATE REPOSITORY ON GITHUB
+   → Go to: https://github.com/new
+   → Name it: scroll-animation
+   → Make it Public
+   → Click "Create repository"
+
+2. OPEN POWERShell IN YOUR PROJECT FOLDER
+   → Right-click in folder → "Open in Terminal"
+   → Or: cd d:\Downloads\Website
+
+3. RUN THESE COMMANDS (copy-paste one at a time):
+
+   git init
+   git add .
+   git commit -m "Initial commit: Scroll animation website"
+   git remote add origin https://github.com/YOUR_USERNAME/YOUR_REPO_NAME.git
+   git branch -M main
+   git push -u origin main
+
+   ⚠️ Replace YOUR_USERNAME and YOUR_REPO_NAME with your actual values!
+
+4. ENABLE GITHUB PAGES
+   → Go to your repository on GitHub
+   → Click "Settings" tab
+   → Click "Pages" in left sidebar
+   → Select: Branch = main, Folder = / (root)
+   → Click "Save"
+
+5. WAIT 2-3 MINUTES
+   → Your site will be live at:
+     https://YOUR_USERNAME.github.io/YOUR_REPO_NAME/
+
+================================================================================
+
+🔄 HOW TO UPDATE YOUR SITE LATER:
+═══════════════════════════════════════════════════════════════════════════════
+
+After making changes to your files:
+
+   git add .
+   git commit -m "Describe your changes here"
+   git push
+
+   → Site updates automatically in 1-2 minutes!
+
+================================================================================
+
+📊 YOUR FILES READY FOR UPLOAD:
+═══════════════════════════════════════════════════════════════════════════════
+
+✓ index.html                 - Main website file
+✓ frame-animator.js          - Smooth animation engine
+✓ image-enhancer.js          - Image quality enhancement
+✓ styles-enhanced.css        - Enhanced styling
+✓ extract_frames.py          - Frame extraction script
+✓ README.md                  - Documentation
+✓ DEPLOYMENT.md              - Detailed deployment guide
+✓ .gitignore                 - Git configuration
+✓ Frames/                    - 145 high-quality frames (~10.4 MB)
+
+Total repository size: ~11 MB (well within GitHub's 1 GB limit)
+
+================================================================================
+
+⚠️ COMMON ISSUES & SOLUTIONS:
+═══════════════════════════════════════════════════════════════════════════════
+
+PROBLEM: "Authentication failed"
+SOLUTION: Use Personal Access Token instead of password
+         → Generate at: https://github.com/settings/tokens
+
+PROBLEM: "404 Page Not Found"
+SOLUTION: Wait 2-5 minutes, then refresh browser
+
+PROBLEM: "Frames not loading"
+SOLUTION: Check Frames/ folder was uploaded (verify on GitHub)
+
+PROBLEM: "Repository already exists"
+SOLUTION: Run: git pull origin main --allow-unrelated-histories
+         Then: git push origin main
+
+================================================================================
+
+🎯 YOUR NEXT STEPS:
+═══════════════════════════════════════════════════════════════════════════════
+
+1. ☐ Create GitHub account (if you don't have one)
+2. ☐ Create new repository on GitHub
+3. ☐ Open PowerShell in: d:\Downloads\Website
+4. ☐ Run the Git commands above
+5. ☐ Enable GitHub Pages in repository Settings
+6. ☐ Wait 2-3 minutes
+7. ☐ Visit your live URL!
+8. ☐ Share with the world! 🎉
+
+================================================================================
+
+📚 DETAILED GUIDES:
+═══════════════════════════════════════════════════════════════════════════════
+
+For step-by-step instructions with screenshots:
+→ Read: DEPLOYMENT.md (detailed guide)
+→ Read: README.md (project documentation)
+
+================================================================================
+
+Need help? Check DEPLOYMENT.md or visit:
+https://docs.github.com/en/pages
+
+================================================================================
